@@ -47,6 +47,26 @@ cv2.VideoWriter_fourcc(*'H264')
 改了，跑了，有结果了，但至今我也不知道用apt-get安装的ffmpeg能不能用libx264，要是换回那个版本不能用我还得装一次，试错成本看起来有点高，暂时不打算做这个实验。
 之前win下用的ffmpeg一直没出过这么多破事（）
 
+附：make_video程序
+```
+def make_video(frames: torch.Tensor, video_path: Path):
+    # 定义视频文件的保存路径和参数
+    fourcc = cv2.VideoWriter_fourcc(*"mp4v")
+    fps = 60.0
+    height, width = frames[0].shape
+    # 创建视频写入器
+    video_writer = cv2.VideoWriter(
+        str(video_path), fourcc, fps, (width, height), isColor=False
+    )
+    # 灰度图一定要加isColor=False，另外size这里参数是先宽后高...，openCV在反人类上一直有一手的
+    # 将每一帧写入视频文件
+    for frame in frames:
+        video_writer.write(frame)
+
+    # 释放视频写入器
+    video_writer.release()
+```
+
 ## 今天你早睡了吗？
 
 总之，如你所见，这个博客充满了破防、骂街、暴论等元素，以后的博客风格根据作者心态而定，请读者们注意分辨并提取有价值信息。
