@@ -48,7 +48,7 @@ cv2.VideoWriter_fourcc(*'H264')
 之前win下用的ffmpeg一直没出过这么多破事（）
 
 附：make_video程序
-```
+```python
 def make_video(frames: torch.Tensor, video_path: Path):
     # 定义视频文件的保存路径和参数
     fourcc = cv2.VideoWriter_fourcc(*"mp4v")
