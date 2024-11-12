@@ -24,6 +24,10 @@ nohup python -u train.py &
 ps -aux
 ```
 其中参数`-a`查看全部，`-u`按用户来查看，`-x`不管是不是当前终端都查看。
+找到那个进程，然后
+```
+kill -9 PID
+```
 
 ## Tensorboard的小技巧
 关于tensorboard具体怎么用不再赘述，网上一大堆攻略。值得注意的是vscode会自动把远程端口转发到本地端口，所以在本机也能查看训练情况。
