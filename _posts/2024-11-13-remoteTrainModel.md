@@ -1,5 +1,5 @@
 ---
-title: '训练模型的一些技巧和注意事项'
+title: '远程训练模型的一些技巧和注意事项'
 date: 2024-11-12
 permalink: /posts/2024/11/train/
 tags:
@@ -19,5 +19,6 @@ nohup python -u train.py &
 
 ## Tensorboard的小技巧
 关于tensorboard具体怎么用不再赘述，网上一大堆攻略。值得注意的是vscode会自动把远程端口转发到本地端口，所以在本机也能查看训练情况。
+
 但是往往发现的问题是tensorboard刷新半天才显示。这其实也是由于输出缓冲的缘故。
-在你想刷新缓冲区的时候，比如多少个batch，writer.flush()一下输出缓冲区。
+在你想刷新缓冲区的时候，比如多少个batch，writer.flush()一下输出缓冲区，这样就不会出现总是刷新半天tensorboard都不更新的情况了。
