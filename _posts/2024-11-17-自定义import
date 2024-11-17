@@ -1,0 +1,13 @@
+---
+title: '关于python import 自定义 module路径踩坑'
+date: 2024-11-17
+permalink: /posts/2024/11/import/
+tags:
+  - cool posts
+  - category1
+---
+
+### 当你发现路径明明是对的但就是import不了
+检查手段：`print(sys.path)`
+
+需要特别注意的是，pathlib中的Path()类是不能被解析的，必须要str()以后再`sys.path.append()`
