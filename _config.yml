@@ -23,10 +23,9 @@ author:
   # Biographic information
   avatar           : "hzj.png"
   name             : "Zhaojun Huang（黄兆鋆）"
-  pronouns         : he  
-  bio              : School of Computer Science, Peking University
+  bio              : #School of Computer Science, Peking University
   location         : #"Beijing, China"
-  employer         : #"Peking University"
+  employer         : "School of Computer Science, Peking University"
   uri              : # URL
   email            : "huangzhaojun@stu.pku.edu.cn" 
 
