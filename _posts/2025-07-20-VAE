@@ -1,0 +1,177 @@
+---
+title: 'VAE 变分自编码器'
+date: 2025-07-20
+permalink: /posts/2025/07/VAE/
+tags:
+  - learning note
+---
+
+## VAE 变分自编码器
+
+学习参考：
+VAE原论文：[Auto Encoding Variational Bayes](https://arxiv.org/abs/1312.6114)
+[AIGC白板手推系列3：变分自编码器VAE](https://www.bilibili.com/video/BV18gGwzqEpQ?spm_id_from=333.788.videopod.sections&vd_source=c49ce81f762253f5761b35616626f962)
+[变分自编码器](https://www.vectorexplore.com/tech/auto-encoder/vae.html)
+[一文理解VAE](https://zhuanlan.zhihu.com/p/64485020)
+[深入浅出地理解VAE](https://www.cnblogs.com/Big-Yellow/p/18882659)
+[全面通透地理解VAE](https://blog.csdn.net/a312863063/article/details/87953517)
+推导路径不尽相同，但是殊途同归
+
+原论文涉及到的推导比较复杂，我们只关注与VAE相关的部分，帮助我们理解VAE的设计insight。
+（事实上是更复杂的我也看不懂了）
+
+### 0. 生成模型，熵，KL散度
+
+请看[前一篇博客](https://bajimh.github.io/posts/2025/03/KL/)
+
+讲的有点乱，大概意思到了
+
+### 1. Autoencoder 自编码器
+
+一个Encoder，一个Decoder。中间的向量在hidden space中。 通过重建损失（即Decoder输出和输入的差异）来训练。非常简单。
+
+值得注意的是，如果hidden space的维度大于等于输入的维度，很有可能学到的是恒等映射。一般来说，hidden space的维度要小一些。可以用于信息压缩
+
+### 2. 用AE来生成？
+
+一个简单的idea是，**能不能在hidden space中采样？**。如果直接随机采样，大概率得到的是一堆噪声。
+
+甚至于说，即使在hidden space的一个有确定映射的点附近采样，得到的结果也很有可能是噪声，或者跟原本的信息没啥关系。
+
+其本质原因就是AE并不对hidden space的分布做任何假设，它只是简单地学习了一个映射。隐空间上分布的性质太差了，它甚至未必连续。
+
+一个直观的改进方法是，对hidden space的分布做一些约束，让他有更多好的性质，比如连续，比如密度函数可以简单计算。
+
+这其中蕴含着贝叶斯学派的观点：数据是由隐变量生成的。模型的任务就是去学习这些隐变量的分布，以及隐变量与观测数据的映射。
+
+### 3. 变分贝叶斯推断
+
+推断（Inference），意为从观测数据中估计出模型参数或者未观测的结果。可以是准确的，也可以是近似的。传统推断直接计算后验分布，通过新的证据估计参数。
+
+在贝叶斯学派观点中，数据的产生过程分成两个部分
+1. 隐变量 $z$ 服从某种先验分布 $p_{\theta}(z)$ ，从这个分布中采样一个 $z$
+2. 观测到的数据（比如图像）$x$ 由某种条件分布 $p_{\theta}(x|z)$ 生成
+
+而推断的过程是这样的：
+- 不去估计边缘分布$p(x)$，而是尝试建模隐变量$z$（例如某个理论模型）
+- 对隐变量的分布有一个先验（“先”于证据“验”证的判断） $p_{\theta}(z)$
+- 对隐变量导出观测数据的分布有一个条件概率 $p_{\theta}(x|z)$，也被称为似然
+- 根据观测的数据$x$，**边缘似然函数**$p_\theta(x)$（也被叫做证据），使用贝叶斯定理推断出隐变量的后验分布 $p_{\theta}(z|x)$。
+
+贝叶斯定理如下：
+$$
+p_{\theta}(z|x) = \frac{p_{\theta}(x|z)p_{\theta}(z)}{p_{\theta}(x)} \\
+$$
+
+$$
+p_\theta(x)= \int p_{\theta}(x|z)p_{\theta}(z)dz
+$$
+
+需要注意的是，尽管它们都被建模成参数化的分布，但是它们实际上是不同的函数。
+
+然而，隐空间的维度可以很大，直接计算这个积分通常是不可行的。这个分母可以理解成归一化系数。我们在未来还会碰到归一化系数不可计算的时候（例如后续的能量模型，分数模型等）。
+
+另一种基于采样的MCMC方法的思路就是，通过对后验分布进行采样，来近似计算这个积分——采样的概率只需要根据分子来计算，反正最后会根据样本量进行归一化。这里埋个坑，以后学到了再说。
+
+既然后验分布无法计算，那么引入一个好算的参数化的近似分布 $q_{\phi}(z|x)$。我们希望这个函数能够尽可能地逼近真实的后验分布 $p_{\theta}(z|x)$，这就要用到变分推断，把后验分布的推断问题转化为优化问题。
+
+变分（Variations），意为泛函（函数的函数）的变化，用于优化整个函数。
+
+前一篇博客提过，两个分布的近似程度可以用KL散度来衡量，这个标量可以用来优化近似的后验分布 $q_{\phi}(z|x)$。(它是一个关于 $z$ 的函数)，这就是“变分推断”的含义。
+
+变分推断的目标是最小化KL散度：
+$$
+D_{KL}(q_{\phi}(z|x)||p_{\theta}(z|x)) = \int q_{\phi}(z|x) \log \frac{q_{\phi}(z|x)}{p_{\theta}(z|x)} dz=\mathbb E_{q_{\phi}(z|x)}\left[\log \frac{q_{\phi}(z|x)}{p_{\theta}(z|x)}\right]
+$$
+
+直接最小化这个目标函数是不可行的，因为 $p_{\theta}(z|x)$ 仍然无法计算，可以绕一圈
+
+通过在似然函数中引入变分分布 $q_{\phi}(z|x)$，我们可以得到：
+$$
+\log p_{\theta}(x) = \log p_{\theta}(x)\int q_{\phi}(z|x) dz= \int q_{\phi}(z|x) \log p_{\theta}(x) dz
+$$
+$$
+=\int q_{\phi}(z|x) \log \frac{p_{\theta}(x,z)}{p_{\theta}(z|x)} dz=\int q_{\phi}(z|x) \log {p_{\theta}(x|z)p_{\theta}(z)\over p_\theta(z|x)} dz
+$$
+$$
+=\int q_{\phi}(z|x) \log {p_{\theta}(x|z)p_{\theta}(z)q_{\theta}(z|x)\over p_\theta(z|x)q_{\theta}(z|x)} dz
+$$
+$$
+=\int q_{\phi}(z|x) \log {p_{\theta}(x|z)p_{\theta}(z)\over q_{\phi}(z|x)} dz + \int q_{\phi}(z|x) \log {q_{\phi}(z|x)\over p_\theta(z|x)} dz
+$$
+$$
+=\mathbb E_{q_{\phi}(z|x)}\left[\log {p_{\theta}(x|z)p_\theta(z)\over q_{\phi}(z|x)}\right] - D_{KL}(q_{\phi}(z|x)||p_{\theta}(z|x))
+$$
+
+值得注意的是，相对于变分分布 $q_{\phi}(z|x)$而言，边缘似然$p_\theta(x)$是一个无关的常量。因此最小化KL散度，等价于最大化左边这个的期望值。
+
+这个期望值被称为变分下界，也叫证据下界（Evidence Lower Bound，ELBO），这是因为KL散度始终非负，边际似然$p_\theta(x)$一定不小于它——这也意味着，优化ELBO，边际似然下界会变得更大，生成模型会变得更好。
+
+因此，整体优化的目标就可以视为最大化ELBO：
+
+$$
+\mathcal{L}(\theta, \phi; x) = \mathbb E_{q_{\phi}(z|x)}\left[\log {p_{\theta}(x|z)p_\theta(z)\over q_{\phi}(z|x)}\right]
+$$
+$$
+=\mathbb E_{q_{\phi}(z|x)}\left[\log p_{\theta}(x|z)\right] - \mathbb E_{q_{\phi}(z|x)}\left[\log {q_{\phi}(z|x)\over p_\theta(z)}\right]
+$$
+$$
+=\mathbb E_{q_{\phi}(z|x)}\left[\log p_{\theta}(x|z)\right] - D_{KL}(q_{\phi}(z|x)||p_{\theta}(z))
+$$
+
+所以，最小化变分分布和后验分布的KL散度，等价于最大化对数似然函数和变分分布与先验分布的KL散度的差。
+
+对于一个数据集中的多个样本 $x_i$，边缘似然（证据）相乘，取对数以后就变成了加法，形式是相同的。
+
+变分推断中，接下来的任务就是要选取合适的变分分布 $q_{\phi}(z|x)$。它应该是什么样的？
+- 常用的近似族包括指数族、神经网络、高斯过程、隐变量模型和许多其他类型的模型。
+
+值得注意的是，上述推导并不涉及对先验分布 $p_\theta(z)$ 和对似然函数 $p_\theta(x|z)$ 的假设和近似，这部分是后面VAE的设计所考虑的。
+
+### 4. VAE生成模型，结构与训练
+
+回到第二节讨论的问题。如果把上述内容放在AE的框架中，Encoder输入x,输出z，就是在用变分分布 $q_{\phi}(z|x)$ 近似后验分布 $p_{\theta}(z|x)$，Decoder输入z，输出x，就是在用生成分布 $p_{\theta}(x|z)$ 生成数据。 而隐变量 $z$ 就可以视为编码。
+
+在VAE中，选取的近似族为高斯分布族。认为在给定输入 $x$ 的情况下，隐变量 $z$ 服从一个协方差为对角矩阵的高斯分布 （即各个维度之间独立）$q_{\phi}(z|x) = \mathcal{N}(\mu_{\phi}(x), \sigma_{\phi}(x)I)$，其中 $\mu_{\phi}(x)$ 和 $\sigma_{\phi}(x)$ 是由神经网络参数化的函数，也就是说，Encoder的输出是$z$的均值和方差，而不是直接输出$z$的值。z的值通过在这个高斯分布中采样得到。
+
+这里涉及到一个技巧，称为**重参数化**。它的思想是将无法微分的采样过程从网络中分离出来，使得网络可以直接对均值和方差进行优化，而不是对随机变量 $z$ 进行优化。
+
+重参数化的方式是将 $z$ 表示为一个确定性函数加上一个随机噪声：
+$$
+z = \mu_{\phi}(x) + \sigma_{\phi}(x) \odot \epsilon
+$$
+其中 $\epsilon \sim \mathcal{N}(0, I)$
+
+我们最终的目标并不是根据已有的理论推断后验分布，而是生成。我们想要得到一个性质良好的隐空间。除了通过变分推断近似出后验分布，还要建模出生成分布 $p_{\theta}(x|z)$ 和先验分布 $p_\theta(x)$，在这里，仍然采用的是高斯分布。
+
+先验分布（隐空间的形态）被设定为一个标准正态分布 $p_\theta(z) = \mathcal{N}(0, I)$，即均值为0，协方差为单位矩阵，注意此时是不含参数的（$\theta$不影响这个分布）。
+
+生成分布 $p_{\theta}(x|z)$ 视情况而定。对于二值化像素，往往设定为伯努利分布。而连续图像往往被设定为一个参数化的高斯分布，形式为 $p_{\theta}(x|z) = \mathcal{N}(\mu_{\theta}(z), \sigma_{\theta}(z)I)$，
+
+这样就可以继续对ELBO进行优化了——把它取反作为损失函数，利用梯度方法来最小化。
+$$
+\mathcal{L}(\theta, \phi; x) = \mathbb E_{q_{\phi}(z|x)}\left[\log p_{\theta}(x|z)\right] - D_{KL}(q_{\phi}(z|x)||p_{\theta}(z))
+$$
+
+右边KL散度有解析表达式
+$$
+-D_{KL}(\mathcal{N}(\mu_{\theta}(z), \sigma_{\theta}(z)I)||\mathcal{N}(0,I) = \frac{1}{2} \left( \sum_{i=1}^{d} \left(1 + \log(\sigma_{\phi,i}(x)^2)-\sigma_{\phi,i}(x)^2 -\mu_{\phi,i}(x)^2  \right) \right)
+$$
+
+实际操作中，由于神经网络的输出在不保证非负。通常Encoder估计的方差值会再经过一个exp来保证方差是正的。
+
+此时只有左边涉及参数$\theta$了，可以理解成对于一个/一批固定的观测数据 $x$，通过Encoder得到的均值和方差，并重参数化技巧采样出隐变量 $z$，然后通过Decoder生成数据 $x'$，使得$P(x'=x)$的概率（对数似然）尽量大。
+
+这个损失的具体形式取决于建模生成分布 $p_{\theta}(x|z)$ 的形式。对于二值化像素（伯努利分布），最大似然等价于最小化二元交叉熵损失；对于连续图像（高斯分布），最大似然等价于最小化均方误差损失。
+
+因此VAE的训练过程可以写成：
+1. Encoder输入$x$，输出均值$\mu_{\phi}(x)$和方差$\sigma_{\phi}(x)$
+2. 通过重参数化技巧采样出隐变量$z = \mu_{\phi}(x) + \sigma_{\phi}(x) \odot \epsilon$
+3. Decoder输入$z$，输出生成的$x' = \mu_{\theta}(z)$
+4. 计算损失函数 $\mathcal{L}(\theta, \phi; x) = MSE(x,x') - D_{KL}(q_{\phi}(z|x)||p_{\theta}(z))$
+5. 反向传播，更新
+
+生成过程可以任意地在隐空间中采样，因为此时隐空间变得连续且均匀，性质很好。
+- 例如，生成一个与特定图像相近的图像，可以在隐空间中找到一个与该图像对应的点，然后在该点附近采样。
+- 再比如想要融合两个图像，可以在它们对应的隐空间点之间进行线性插值，然后用插值点生成新的图像。
+
