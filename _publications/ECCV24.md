@@ -7,7 +7,7 @@ excerpt: ''
 date: 2024-09-29
 venue: 'In Proc. of European Conference on Computer Vision (ECCV)'
 paperurl: 'https://openreview.net/pdf?id=LEGgIF7VtC'
-citation: 'Siqi Yang^#, Zhaojun Huang^#, Yakun Chang, Bin Fan, Zhaofei Yu, and Boxin Shi. Real-Data-Driven 2000 FPS Color Video from Mosaicked Chromatic Spikes. In Proc. of European Conference on Computer Vision (ECCV), 2024'
+citation: 'Siqi Yang, Zhaojun Huang, Yakun Chang, Bin Fan, Zhaofei Yu, and Boxin Shi. Real-Data-Driven 2000 FPS Color Video from Mosaicked Chromatic Spikes. In Proc. of European Conference on Computer Vision (ECCV), 2024'
 ---
 
 ### Abstract
