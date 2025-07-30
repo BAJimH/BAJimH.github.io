@@ -4,7 +4,7 @@ collection: publications
 category: conferences
 permalink: /publication/CVPR24-Towards
 excerpt: ''
-date: 2024
+date: 2024-06-17
 venue: 'Proceeding. of IEEE/CVF Conference on Computer Vision and Pattern Recognition (CVPR)'
 paperurl: 'https://openaccess.thecvf.com/content/CVPR2024/papers/Chang_Towards_HDR_and_HFR_Video_from_Rolling-Mixed-Bit_Spikings_CVPR_2024_paper.pdf'
 citation: 'Yakun Chang, Yeliduosi Xiaokaiti, Yujia Liu, Bin Fan, Zhaojun Huang, Tiejun Huang, and Boxin Shi. Towards HDR and HFR Video from Rolling-Mixed-Bit Spikings. In Proc. of IEEE/CVF Conference on Computer Vision and Pattern Recognition (CVPR), 2024.'
