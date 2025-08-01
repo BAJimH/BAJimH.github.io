@@ -304,7 +304,7 @@ $$
 而方差与$x$无关，那么$\Sigma^2_\theta$完全可以就取$\sigma^2_tI$。高斯分布的KL散度是有封闭形式的，而在方差一致的条件下，最小化KL散度等价于最小化均值的平方差，即
 
 $$
-    \argmin_\theta D_{KL}(q(x_{t-1} \vert x_t, x_0) \vert\vert p_\theta(x_{t-1} \vert x_t)) = \argmin_\theta\frac{1}{2\sigma^2_t}\vert\vert\mu_t(x_t) - \mu_\theta(x_t,t)\vert\vert_2^2
+    \arg\min_\theta D_{KL}(q(x_{t-1} \vert x_t, x_0) \vert\vert p_\theta(x_{t-1} \vert x_t)) = \arg\min_\theta\frac{1}{2\sigma^2_t}\vert\vert\mu_t(x_t) - \mu_\theta(x_t,t)\vert\vert_2^2
 $$
 
 
@@ -347,7 +347,7 @@ $$
 而能量模型通过一个隐函数来定义能量函数$E_\theta(x,y)$，通过最小化能量函数来将前向估计问题转变为优化问题，即
 
 $$
-y(x)=\argmin\limits_{x} E_\theta(x,y)
+y(x)=\arg\min\limits_{x} E_\theta(x,y)
 $$
 
 
@@ -597,8 +597,8 @@ $$
 本质上都是Langevin采样。而观察二者的训练目标，DDPM的训练目标写成期望形式的话有
 
 $$
-\theta^* = \argmin_\theta \mathbb {E}_{t,x_0,\epsilon }\vert\vert \epsilon - \epsilon_\theta(x_t,t)\vert\vert_2^2\\
-= \argmin_\theta \mathbb {E}_{t,x_0,\epsilon }\left[\vert\vert \epsilon - \epsilon_\theta(\sqrt{\bar\alpha_t}x_0+\sqrt{1-\bar \alpha_t}\epsilon,t)\vert\vert_2^2\right]\\
+\theta^* = \arg\min_\theta \mathbb {E}_{t,x_0,\epsilon }\vert\vert \epsilon - \epsilon_\theta(x_t,t)\vert\vert_2^2\\
+= \arg\min_\theta \mathbb {E}_{t,x_0,\epsilon }\left[\vert\vert \epsilon - \epsilon_\theta(\sqrt{\bar\alpha_t}x_0+\sqrt{1-\bar \alpha_t}\epsilon,t)\vert\vert_2^2\right]\\
 $$
 
 而在前面，我们推导过加了祖先采样后，条件分布就是高斯分布，它的梯度是
@@ -609,13 +609,13 @@ $$
 多噪声Score Matching的训练目标是
 
 $$
-\theta^* = \argmin_\theta \sum\limits_{i}\sigma_i^2 \mathbb{E}_{p_{data}(x)}\left[\mathbb{E}_{ p_{\sigma_i}(x'\vert x)}\left[\vert\vert s_\theta(x', i) + \frac{(x' - x)}{\sigma_i^2}\vert\vert_2^2\right]\right]
+\theta^* = \arg\min_\theta \sum\limits_{i}\sigma_i^2 \mathbb{E}_{p_{data}(x)}\left[\mathbb{E}_{ p_{\sigma_i}(x'\vert x)}\left[\vert\vert s_\theta(x', i) + \frac{(x' - x)}{\sigma_i^2}\vert\vert_2^2\right]\right]
 $$
 
 注意到这里$x'$也是通过$x$加噪产生的，二者相减就是噪声$\sigma_iz$
 
 $$
-= \argmin_\theta \mathbb{E}_{i,p_{data}(x),z}\left[\sigma_i^2\vert\vert s_\theta(x', i) + {z\over \sigma_i}\vert\vert_2^2\right] \\= \argmin_\theta \mathbb{E}_{i,p_{data}(x),z}\left[\vert\vert z - (-\sigma_is_\theta(x', i))\vert\vert_2^2\right]
+= \arg\min_\theta \mathbb{E}_{i,p_{data}(x),z}\left[\sigma_i^2\vert\vert s_\theta(x', i) + {z\over \sigma_i}\vert\vert_2^2\right] \\= \arg\min_\theta \mathbb{E}_{i,p_{data}(x),z}\left[\vert\vert z - (-\sigma_is_\theta(x', i))\vert\vert_2^2\right]
 $$
 
 不能说是非常相像，只能说是完全一致。
