@@ -9,6 +9,7 @@ tags:
 ---
 
 # 从不同角度（去噪、变分推断、Score matching）理解扩散模型 Diffusion Model 
+
 学习资料：
 - [Denoising Diffusion Probabilistic Models](https://arxiv.org/abs/2006.11239)
 - [Estimation of Non-Normalized Statistical Modelsby Score Matching](https://jmlr.org/papers/volume6/hyvarinen05a/hyvarinen05a.pdf)
