@@ -13,11 +13,7 @@
   <script>
     (function() {
       // 初始化 LeanCloud
-      AV.init({
-        appId: '{{ site.leancloud.app_id }}',
-        appKey: '{{ site.leancloud.app_key }}',
-        serverURL: '{{ site.leancloud.server_url }}'
-      });
+      AV.initialize("{{site.leancloud.app_id}}", "{{site.leancloud.app_key}}");
 
       // 获取当前页面的唯一标识（使用URL作为标识）
       const pageUrl = window.location.pathname;
