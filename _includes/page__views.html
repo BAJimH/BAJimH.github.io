@@ -13,12 +13,37 @@
     <script src="https://cdn.jsdelivr.net/npm/leancloud-storage@4.12.0/dist/av-min.js"></script>
     <script>
       (function() {
+        // 检查配置是否存在
+        var appId = '{{ site.leancloud.app_id }}';
+        var appKey = '{{ site.leancloud.app_key }}';
+        var serverURL = '{{ site.leancloud.server_url }}';
+        
+        if (!appId || !appKey || !serverURL) {
+          console.error('LeanCloud 配置不完整:', {appId: appId, appKey: appKey, serverURL: serverURL});
+          document.getElementById('post-views-count').textContent = '配置错误';
+          return;
+        }
+        
+        // 等待 AV 对象加载
+        if (typeof AV === 'undefined') {
+          console.error('LeanCloud SDK 未加载');
+          document.getElementById('post-views-count').textContent = 'SDK加载失败';
+          return;
+        }
+        
         // 初始化 LeanCloud
-        AV.init({
-          appId: '{{ site.leancloud.app_id }}',
-          appKey: '{{ site.leancloud.app_key }}',
-          serverURL: '{{ site.leancloud.server_url }}'
-        });
+        try {
+          AV.init({
+            appId: appId,
+            appKey: appKey,
+            serverURL: serverURL
+          });
+          console.log('LeanCloud 初始化成功');
+        } catch (error) {
+          console.error('LeanCloud 初始化失败:', error);
+          document.getElementById('post-views-count').textContent = '初始化失败';
+          return;
+        }
 
         // 获取当前页面的唯一标识（使用URL作为标识）
         const pageUrl = window.location.pathname;
@@ -26,40 +51,47 @@
         
         // 更新阅读量
         function updatePostViews() {
-          const PostViews = AV.Object.extend('PostViews');
-          const query = new AV.Query('PostViews');
-          
-          // 使用URL作为唯一标识
-          query.equalTo('url', pageUrl);
-          
-          query.first().then(function(post) {
-            if (post) {
-              // 文章已存在，增加阅读量
-              post.increment('views', 1);
-              post.save().then(function() {
-                const views = post.get('views');
-                document.getElementById('post-views-count').textContent = views;
-              }).catch(function(error) {
-                console.error('更新阅读量失败:', error);
-                document.getElementById('post-views-count').textContent = post.get('views') || 0;
-              });
-            } else {
-              // 文章不存在，创建新记录
-              const newPost = new PostViews();
-              newPost.set('url', pageUrl);
-              newPost.set('title', pageTitle);
-              newPost.set('views', 1);
-              newPost.save().then(function() {
-                document.getElementById('post-views-count').textContent = '1';
-              }).catch(function(error) {
-                console.error('创建阅读量记录失败:', error);
-                document.getElementById('post-views-count').textContent = '0';
-              });
-            }
-          }).catch(function(error) {
-            console.error('查询阅读量失败:', error);
+          try {
+            const PostViews = AV.Object.extend('PostViews');
+            const query = new AV.Query('PostViews');
+            
+            // 使用URL作为唯一标识
+            query.equalTo('url', pageUrl);
+            
+            query.first().then(function(post) {
+              if (post) {
+                // 文章已存在，增加阅读量
+                post.increment('views', 1);
+                post.save().then(function() {
+                  const views = post.get('views');
+                  document.getElementById('post-views-count').textContent = views;
+                  console.log('阅读量更新成功:', views);
+                }).catch(function(error) {
+                  console.error('更新阅读量失败:', error);
+                  document.getElementById('post-views-count').textContent = post.get('views') || 0;
+                });
+              } else {
+                // 文章不存在，创建新记录
+                const newPost = new PostViews();
+                newPost.set('url', pageUrl);
+                newPost.set('title', pageTitle);
+                newPost.set('views', 1);
+                newPost.save().then(function() {
+                  document.getElementById('post-views-count').textContent = '1';
+                  console.log('创建阅读量记录成功');
+                }).catch(function(error) {
+                  console.error('创建阅读量记录失败:', error);
+                  document.getElementById('post-views-count').textContent = '0';
+                });
+              }
+            }).catch(function(error) {
+              console.error('查询阅读量失败:', error);
+              document.getElementById('post-views-count').textContent = '加载失败';
+            });
+          } catch (error) {
+            console.error('更新阅读量时发生错误:', error);
             document.getElementById('post-views-count').textContent = '加载失败';
-          });
+          }
         }
 
         // 页面加载完成后更新阅读量
