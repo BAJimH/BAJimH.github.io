@@ -1,13 +1,73 @@
-{% if page.id %}
+{% if site.leancloud.enabled and page.id %}
   <div class="page__views" style="margin-top: 2em; padding-top: 1em; border-top: 1px solid #e8e8e8;">
     <span class="page__views-label" style="color: #999; font-size: 0.875em; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;">
       <i class="fa fa-eye" aria-hidden="true"></i> 阅读量：
     </span>
-    <span id="busuanzi_container_page_pv" style="color: #999; font-size: 0.875em; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;">
-      <span id="busuanzi_value_page_pv">加载中...</span>
+    <span id="post-views-count" style="color: #999; font-size: 0.875em; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;">
+      加载中...
     </span>
   </div>
   
-  <script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+  <!-- LeanCloud 阅读量统计 -->
+  <script src="https://cdn.jsdelivr.net/npm/leancloud-storage@4.12.0/dist/av-min.js"></script>
+  <script>
+    (function() {
+      // 初始化 LeanCloud
+      AV.init({
+        appId: '{{ site.leancloud.app_id }}',
+        appKey: '{{ site.leancloud.app_key }}',
+        serverURL: '{{ site.leancloud.server_url }}'
+      });
+
+      // 获取当前页面的唯一标识（使用URL作为标识）
+      const pageUrl = window.location.pathname;
+      const pageTitle = '{{ page.title | escape }}';
+      
+      // 更新阅读量
+      function updatePostViews() {
+        const PostViews = AV.Object.extend('PostViews');
+        const query = new AV.Query('PostViews');
+        
+        // 使用URL作为唯一标识
+        query.equalTo('url', pageUrl);
+        
+        query.first().then(function(post) {
+          if (post) {
+            // 文章已存在，增加阅读量
+            post.increment('views', 1);
+            post.save().then(function() {
+              const views = post.get('views');
+              document.getElementById('post-views-count').textContent = views;
+            }).catch(function(error) {
+              console.error('更新阅读量失败:', error);
+              document.getElementById('post-views-count').textContent = post.get('views') || 0;
+            });
+          } else {
+            // 文章不存在，创建新记录
+            const newPost = new PostViews();
+            newPost.set('url', pageUrl);
+            newPost.set('title', pageTitle);
+            newPost.set('views', 1);
+            newPost.save().then(function() {
+              document.getElementById('post-views-count').textContent = '1';
+            }).catch(function(error) {
+              console.error('创建阅读量记录失败:', error);
+              document.getElementById('post-views-count').textContent = '0';
+            });
+          }
+        }).catch(function(error) {
+          console.error('查询阅读量失败:', error);
+          document.getElementById('post-views-count').textContent = '加载失败';
+        });
+      }
+
+      // 页面加载完成后更新阅读量
+      if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', updatePostViews);
+      } else {
+        updatePostViews();
+      }
+    })();
+  </script>
 {% endif %}
 
