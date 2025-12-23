@@ -151,7 +151,7 @@ analytics:
 # Post Views Counter (阅读量统计)
 # 使用 LeanCloud 存储阅读量数据，确保数据持久化且每篇文章独立统计
 leancloud:
-  enabled               : true  # 设置为 true 启用 LeanCloud 阅读量统计
+  enabled               : false  # 设置为 true 启用 LeanCloud 阅读量统计
   app_id                : vFpunM9GivXZ9ugan7QHTV3E-gzGzoHsz # LeanCloud App ID
   app_key               : D6BFDkNYWJORG4SuutvLYltp  # LeanCloud App Key
   server_url            : https://vfpunm9g.lc-cn-n1-shared.com # LeanCloud Server URL
