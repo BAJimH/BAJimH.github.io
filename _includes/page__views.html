@@ -1,112 +1,114 @@
-{% if site.leancloud.enabled and page.id %}
-<div class="page__views" style="margin-top: 2em; padding-top: 1em; border-top: 1px solid #e8e8e8;">
-    <span class="page__views-label"
-        style="color: #999; font-size: 0.875em; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;">
-        <i class="fa fa-eye" aria-hidden="true"></i> 阅读量：
+{% if page.id %}
+  <div class="page__views" style="margin-top: 2em; padding-top: 1em; border-top: 1px solid #e8e8e8;">
+    <span class="page__views-label" style="color: #999; font-size: 0.875em; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;">
+      <i class="fa fa-eye" aria-hidden="true"></i> 阅读量：
     </span>
-    <span id="leancloud-page-views" 
-          class="leancloud_visitors"
-          data-flag-title="{{ page.title | escape }}"
-          style="color: #999; font-size: 0.875em; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;">
-        加载中...
+    <span id="post-views-count" style="color: #999; font-size: 0.875em; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;">
+      加载中...
     </span>
-</div>
-
-<!-- LeanCloud 阅读量统计 -->
-<script src="https://cdn.jsdelivr.net/npm/leancloud-storage@4.12.0/dist/av-min.js"></script>
-<script>
-(function() {
-    // 初始化 LeanCloud
-    var leancloudConfig = {
-        appId: '{{ site.leancloud.app_id }}',
-        appKey: '{{ site.leancloud.app_key }}'
-    };
-    
-    // 如果配置了server_url则使用，否则自动生成
-    {% if site.leancloud.server_url %}
-    leancloudConfig.serverURL = '{{ site.leancloud.server_url }}';
-    {% else %}
-    // 自动生成serverURL（格式：https://APP_ID_PREFIX.api.lncldglobal.com）
-    // 从appId中提取前缀：如果包含连字符则取第一部分，否则使用整个appId
-    var appIdPrefix = leancloudConfig.appId.indexOf('-') !== -1 
-        ? leancloudConfig.appId.split('-')[0] 
-        : leancloudConfig.appId;
-    leancloudConfig.serverURL = 'https://' + appIdPrefix + '.api.lncldglobal.com';
-    console.log('自动生成serverURL:', leancloudConfig.serverURL);
-    {% endif %}
-    
-    AV.init(leancloudConfig);
-
-    // 获取当前页面的唯一标识（使用URL作为标识）
-    const pageUrl = window.location.pathname;
-    const pageTitle = '{{ page.title | escape }}';
-    const displayElement = document.getElementById('leancloud-page-views');
-    
-    if (!displayElement) {
-        console.error('找不到阅读量显示元素');
-        return;
-    }
-
-    // 更新阅读量
-    function updatePostViews() {
-        const PostViews = AV.Object.extend('PostViews');
-        const query = new AV.Query('PostViews');
-        
-        // 使用URL作为唯一标识
-        query.equalTo('url', pageUrl);
-        
-        query.first().then(function(post) {
-            if (post) {
-                // 文章已存在，先保存原始值（保存失败时使用）
-                const originalViews = post.get('views') || 0;
-                
-                // 增加阅读量
-                post.increment('views', 1);
-                post.save().then(function() {
-                    // 保存成功后，获取服务器确认的值
-                    const views = post.get('views');
-                    displayElement.textContent = views;
-                    console.log('阅读量更新成功:', views);
-                }).catch(function(error) {
-                    console.error('更新阅读量失败:', error);
-                    // 保存失败时，显示服务器上的原始值（不是内存中递增后的值）
-                    displayElement.textContent = originalViews;
-                    console.warn('显示原始阅读量（未增加）:', originalViews);
-                });
-            } else {
-                // 文章不存在，创建新记录
-                const newPost = new PostViews();
-                
-                // 设置 ACL（允许公开读写）
-                const acl = new AV.ACL();
-                acl.setPublicReadAccess(true);
-                acl.setPublicWriteAccess(true);
-                newPost.setACL(acl);
-                
-                newPost.set('url', pageUrl);
-                newPost.set('title', pageTitle);
-                newPost.set('views', 1);
-                
-                newPost.save().then(function() {
-                    displayElement.textContent = '1';
-                    console.log('创建阅读量记录成功');
-                }).catch(function(error) {
-                    console.error('创建阅读量记录失败:', error);
-                    displayElement.textContent = '0';
-                });
-            }
-        }).catch(function(error) {
-            console.error('查询阅读量失败:', error);
-            displayElement.textContent = '加载失败';
+  </div>
+  
+  {% if site.leancloud.enabled %}
+    <!-- LeanCloud 阅读量统计 -->
+    <script src="https://cdn.jsdelivr.net/npm/leancloud-storage@4.12.0/dist/av-min.js"></script>
+    <script>
+      (function() {
+        // 初始化 LeanCloud
+        AV.init({
+          appId: '{{ site.leancloud.app_id }}',
+          appKey: '{{ site.leancloud.app_key }}',
+          serverURL: '{{ site.leancloud.server_url }}'
         });
-    }
 
-    // 页面加载完成后更新阅读量
-    if (document.readyState === 'loading') {
-        document.addEventListener('DOMContentLoaded', updatePostViews);
-    } else {
-        updatePostViews();
-    }
-})();
-</script>
+        // 获取当前页面的唯一标识（使用URL作为标识）
+        const pageUrl = window.location.pathname;
+        const pageTitle = '{{ page.title | escape }}';
+        
+        // 更新阅读量
+        function updatePostViews() {
+          const PostViews = AV.Object.extend('PostViews');
+          const query = new AV.Query('PostViews');
+          
+          // 使用URL作为唯一标识
+          query.equalTo('url', pageUrl);
+          
+          query.first().then(function(post) {
+            if (post) {
+              // 文章已存在，增加阅读量
+              post.increment('views', 1);
+              post.save().then(function() {
+                const views = post.get('views');
+                document.getElementById('post-views-count').textContent = views;
+              }).catch(function(error) {
+                console.error('更新阅读量失败:', error);
+                document.getElementById('post-views-count').textContent = post.get('views') || 0;
+              });
+            } else {
+              // 文章不存在，创建新记录
+              const newPost = new PostViews();
+              newPost.set('url', pageUrl);
+              newPost.set('title', pageTitle);
+              newPost.set('views', 1);
+              newPost.save().then(function() {
+                document.getElementById('post-views-count').textContent = '1';
+              }).catch(function(error) {
+                console.error('创建阅读量记录失败:', error);
+                document.getElementById('post-views-count').textContent = '0';
+              });
+            }
+          }).catch(function(error) {
+            console.error('查询阅读量失败:', error);
+            document.getElementById('post-views-count').textContent = '加载失败';
+          });
+        }
+
+        // 页面加载完成后更新阅读量
+        if (document.readyState === 'loading') {
+          document.addEventListener('DOMContentLoaded', updatePostViews);
+        } else {
+          updatePostViews();
+        }
+      })();
+    </script>
+  {% else %}
+    <!-- 不蒜子阅读量统计（备选方案） -->
+    <script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+    <script>
+      // 确保不蒜子使用页面URL作为唯一标识
+      (function() {
+        // 等待不蒜子加载完成
+        function checkBusuanzi() {
+          if (typeof busuanzi !== 'undefined') {
+            const countElement = document.getElementById('busuanzi_value_page_pv');
+            if (countElement && countElement.textContent === '') {
+              countElement.textContent = '0';
+            }
+            // 不蒜子会自动根据页面URL统计，这里不需要额外配置
+          } else {
+            setTimeout(checkBusuanzi, 100);
+          }
+        }
+        checkBusuanzi();
+      })();
+    </script>
+    <span id="busuanzi_container_page_pv" style="display: none;">
+      <span id="busuanzi_value_page_pv"></span>
+    </span>
+    <script>
+      // 将不蒜子的值同步到显示元素
+      (function() {
+        function syncBusuanziCount() {
+          const busuanziElement = document.getElementById('busuanzi_value_page_pv');
+          const displayElement = document.getElementById('post-views-count');
+          if (busuanziElement && displayElement && busuanziElement.textContent && busuanziElement.textContent !== '') {
+            displayElement.textContent = busuanziElement.textContent;
+          } else {
+            setTimeout(syncBusuanziCount, 500);
+          }
+        }
+        setTimeout(syncBusuanziCount, 1000);
+      })();
+    </script>
+  {% endif %}
 {% endif %}
+
