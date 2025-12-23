@@ -16,7 +16,7 @@ tags:
 
 输入的格式非常混乱，且没有一个统一的标准（至少我没找到文档...），似乎是一个约定俗成的东西。
 
-例如，如果你设置了return_dict=True，返回值将为一个字典，大概长这样
+例如，如果你设置了return_dict=True，返回值会类似一个字典，大概长这样
 ```python
 input={
     "input_ids": tensor, # 在NLP中常用，文本tokenize后的id
@@ -26,8 +26,9 @@ input={
     "spatial_shapes": tensor,
 }
 ```
-或者是一个叫做``BatchFeature``的类，长这样
+实际上是个叫做``transformers.feature_extraction_utils.BatchFeature``的类，长这样
 ```python
+
 class BatchFeature(BaseModel):
     data: Dict[str, Any]
     tensor_type: Optional[str] = None
@@ -38,9 +39,7 @@ class BatchFeature(BaseModel):
 >>
 >>tensor_type (Union[None, str, TensorType], *可选*) — 你可以在此处指定一个 tensor_type，以便在初始化时将整数列表转换为 PyTorch/TensorFlow/Numpy 张量。
 >>
->该类派生自 Python 字典，可以像字典一样使用。
-
-也是个字典。
+>该类派生自 Python 字典，可以像字典一样使用，还支持.to()方法，将数据移动到指定的设备上。
 
 这些键值可以说是奇奇怪怪，也没有文档说明，暗藏在这些库最底层的代码中，你要是想中间拆开，插入一点自己的东西，比登天还难。
 
@@ -105,7 +104,7 @@ def default_collate(batch):
 """
 ```
 
-其中这个Mapping就是我们前面提到的东西，如果它是一个字典/BatchFeature，那么它会分别的聚合每个value。而前面的value是processor处理完的结果，一般是一个torch.Tensor，在第一维加个B，变成(B, ...)，这就是我们喜闻乐见的东西了。
+其中这个Mapping就是我们前面提到的东西，如果它是一个BatchFeature，那么它会分别的聚合每个value。而前面的value是processor处理完的结果，一般是一个torch.Tensor，在第一维加个B，变成(B, ...)，这就是我们喜闻乐见的东西了。
 
 如果你用过webdataset，还有一个torch dataloader的平替叫WebLoader，它和dataloader接口非常相似。
 
