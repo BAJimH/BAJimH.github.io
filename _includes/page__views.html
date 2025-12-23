@@ -26,8 +26,13 @@
     {% if site.leancloud.server_url %}
     leancloudConfig.serverURL = '{{ site.leancloud.server_url }}';
     {% else %}
-    // 自动生成serverURL（格式：https://APP_ID.api.lncldglobal.com）
-    leancloudConfig.serverURL = 'https://' + leancloudConfig.appId.split('-')[0] + '.api.lncldglobal.com';
+    // 自动生成serverURL（格式：https://APP_ID_PREFIX.api.lncldglobal.com）
+    // 从appId中提取前缀：如果包含连字符则取第一部分，否则使用整个appId
+    var appIdPrefix = leancloudConfig.appId.indexOf('-') !== -1 
+        ? leancloudConfig.appId.split('-')[0] 
+        : leancloudConfig.appId;
+    leancloudConfig.serverURL = 'https://' + appIdPrefix + '.api.lncldglobal.com';
+    console.log('自动生成serverURL:', leancloudConfig.serverURL);
     {% endif %}
     
     AV.init(leancloudConfig);
@@ -52,17 +57,21 @@
         
         query.first().then(function(post) {
             if (post) {
-                // 文章已存在，增加阅读量
+                // 文章已存在，先保存原始值（保存失败时使用）
+                const originalViews = post.get('views') || 0;
+                
+                // 增加阅读量
                 post.increment('views', 1);
                 post.save().then(function() {
+                    // 保存成功后，获取服务器确认的值
                     const views = post.get('views');
                     displayElement.textContent = views;
                     console.log('阅读量更新成功:', views);
                 }).catch(function(error) {
                     console.error('更新阅读量失败:', error);
-                    // 即使保存失败，也显示当前值
-                    const currentViews = post.get('views') || 0;
-                    displayElement.textContent = currentViews;
+                    // 保存失败时，显示服务器上的原始值（不是内存中递增后的值）
+                    displayElement.textContent = originalViews;
+                    console.warn('显示原始阅读量（未增加）:', originalViews);
                 });
             } else {
                 // 文章不存在，创建新记录
