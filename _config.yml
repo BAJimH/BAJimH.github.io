@@ -154,7 +154,6 @@ leancloud:
   enabled               : true  # 设置为 true 启用 LeanCloud 阅读量统计
   app_id                : vFpunM9GivXZ9ugan7QHTV3E-gzGzoHsz # LeanCloud App ID
   app_key               : D6BFDkNYWJORG4SuutvLYltp  # LeanCloud App Key
-  server_url            : https://vFpunM9GivXZ9ugan7QHTV3E-gzGzoHsz.api.lncldglobal.com # LeanCloud Server URL，格式: https://YOUR_APP_ID.api.lncldglobal.com
 
 
 # Reading Files
