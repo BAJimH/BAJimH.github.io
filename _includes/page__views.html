@@ -4,94 +4,100 @@
         style="color: #999; font-size: 0.875em; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;">
         <i class="fa fa-eye" aria-hidden="true"></i> 阅读量：
     </span>
-    <span id="post-views-count"
-        style="color: #999; font-size: 0.875em; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;">
+    <span id="leancloud-page-views" 
+          class="leancloud_visitors"
+          data-flag-title="{{ page.title | escape }}"
+          style="color: #999; font-size: 0.875em; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;">
         加载中...
     </span>
 </div>
 
 <!-- LeanCloud 阅读量统计 -->
-<!-- 同时兼容http与https -->
-<script src="//cdn1.lncld.net/static/js/2.5.0/av-min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/leancloud-storage@4.12.0/dist/av-min.js"></script>
 <script>
-    // 第一个参数是appid，第二个参数是appkey，此处的只是示例
-    AV.initialize("{{ site.leancloud.app_id }}", "{{ site.leancloud.app_key }}");
-    // 自己创建的Class的名字
-    var name = 'Counter';
-    function createRecord(Counter) {
-        // 设置 ACL
-        var acl = new AV.ACL();
-        acl.setPublicReadAccess(true);
-        acl.setPublicWriteAccess(true);
-        // 获得span的所有元素
-        var elements = document.getElementsByClassName('leancloud_visitors');
-        // 一次创建多条记录
-        var allcounter = [];
-        for (var i = 0; i < elements.length; i++) {
-            // 若某span的内容不包括 '-' ，则不必创建记录
-            if (elements[i].textContent.indexOf('-') == -1) {
-                continue;
+(function() {
+    // 初始化 LeanCloud
+    var leancloudConfig = {
+        appId: '{{ site.leancloud.app_id }}',
+        appKey: '{{ site.leancloud.app_key }}'
+    };
+    
+    // 如果配置了server_url则使用，否则自动生成
+    {% if site.leancloud.server_url %}
+    leancloudConfig.serverURL = '{{ site.leancloud.server_url }}';
+    {% else %}
+    // 自动生成serverURL（格式：https://APP_ID.api.lncldglobal.com）
+    leancloudConfig.serverURL = 'https://' + leancloudConfig.appId.split('-')[0] + '.api.lncldglobal.com';
+    {% endif %}
+    
+    AV.init(leancloudConfig);
+
+    // 获取当前页面的唯一标识（使用URL作为标识）
+    const pageUrl = window.location.pathname;
+    const pageTitle = '{{ page.title | escape }}';
+    const displayElement = document.getElementById('leancloud-page-views');
+    
+    if (!displayElement) {
+        console.error('找不到阅读量显示元素');
+        return;
+    }
+
+    // 更新阅读量
+    function updatePostViews() {
+        const PostViews = AV.Object.extend('PostViews');
+        const query = new AV.Query('PostViews');
+        
+        // 使用URL作为唯一标识
+        query.equalTo('url', pageUrl);
+        
+        query.first().then(function(post) {
+            if (post) {
+                // 文章已存在，增加阅读量
+                post.increment('views', 1);
+                post.save().then(function() {
+                    const views = post.get('views');
+                    displayElement.textContent = views;
+                    console.log('阅读量更新成功:', views);
+                }).catch(function(error) {
+                    console.error('更新阅读量失败:', error);
+                    // 即使保存失败，也显示当前值
+                    const currentViews = post.get('views') || 0;
+                    displayElement.textContent = currentViews;
+                });
+            } else {
+                // 文章不存在，创建新记录
+                const newPost = new PostViews();
+                
+                // 设置 ACL（允许公开读写）
+                const acl = new AV.ACL();
+                acl.setPublicReadAccess(true);
+                acl.setPublicWriteAccess(true);
+                newPost.setACL(acl);
+                
+                newPost.set('url', pageUrl);
+                newPost.set('title', pageTitle);
+                newPost.set('views', 1);
+                
+                newPost.save().then(function() {
+                    displayElement.textContent = '1';
+                    console.log('创建阅读量记录成功');
+                }).catch(function(error) {
+                    console.error('创建阅读量记录失败:', error);
+                    displayElement.textContent = '0';
+                });
             }
-            var title = elements[i].getAttribute('data-flag-title');
-            var url = elements[i].id;
-            var newcounter = new Counter();
-            newcounter.setACL(acl);
-            newcounter.set("title", title);
-            newcounter.set("url", url);
-            newcounter.set("time", 0);
-            allcounter.push(newcounter);
-            // 顺便更新显示span为默认值0
-            elements[i].textContent = 0;
-        }
-        AV.Object.saveAll(allcounter).then(function (todo) {
-            // 成功保存记录之后
-            console.log('创建记录成功！');
-        }, function (error) {
-            // 异常错误 
-            console.error('创建记录失败: ' + error.message);
+        }).catch(function(error) {
+            console.error('查询阅读量失败:', error);
+            displayElement.textContent = '加载失败';
         });
     }
-    function showCount(Counter) {
-        // 是否需要创建新纪录的标志（添加一篇新文章）
-        var flag = false;
-        var query = new AV.Query(name);
-        query.greaterThanOrEqualTo('time', 0);
-        query.find().then(function (results) {
-            // 当获取到的记录为0时置默认值
-            if (results.length == 0) {
-                $('.leancloud_visitors').text('-');
-                flag = true;
-                console.log('返回查询记录为空');
-                // 如果获取到空记录就创建新记录
-                createRecord(Counter);
-                return;
-            }
-            // 将获取到的数据设置为text
-            for (var i = 0; i < results.length; i++) {
-                var item = results[i];
-                var url = item.get('url');
-                var time = item.get('time');
-                var element = document.getElementById(url);
-                element.textContent = time;
-            }
-            // 当某个span含有默认值时说明需要创建记录
-            if ($('.leancloud_visitors').text().indexOf("-") != -1) {
-                flag = true;
-            }
-            // 当获取的记录数与span个数不吻合时
-            if (results.length != $('.leancloud_visitors').length) {
-                flag = true;
-            }
-            if (flag) {
-                createRecord(Counter);
-            }
-        }, function (error) {
-            console.log('query error:' + error.message);
-        });
+
+    // 页面加载完成后更新阅读量
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', updatePostViews);
+    } else {
+        updatePostViews();
     }
-    $(function () {
-        var Counter = AV.Object.extend(name);
-        showCount(Counter);
-    });
+})();
 </script>
 {% endif %}
