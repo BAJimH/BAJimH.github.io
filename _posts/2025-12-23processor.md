@@ -116,3 +116,23 @@ def default_collate(batch):
 4. 用dataloader类封装dataset类，设置好batchsize，shuffle，num_workers等参数
 5. 模型直接用dataloader类并行加载数据，在加载的时候真正执行pipeline，不需要接触任何底层代码
 
+看似解决了？
+如果直接run，很容易碰到另一个问题：同一个batch的张量长度不匹配
+
+一般的解决方案是pad，有两种，一种是动态pad（每个batch都pad到最大长度），一种是静态pad（所有batch都pad到相同的max_length）,后者非常浪费显存，好处是可以在dataloader阶段就做完tokenize和padding。
+
+动态pad的实现,则需要重写一个collate_fn函数，并把这个函数传入dataloader类。
+例如我要做一个双图的推理：
+```python
+    @torch.no_grad()
+    def collate_fn(
+        self, batch: List[Tuple[Image.Image, Image.Image]]
+    ) -> BatchFeature:
+        inputs = self.processor(
+            images=batch,
+            text=[self.prompt] * len(batch),
+            padding="longest",
+            padding_side="left",
+            return_tensors="pt").to("cuda")
+        return inputs
+```
