@@ -54,7 +54,7 @@ dataset类往往支持map函数，即对每一个item，都调用一个函数进
 
 >需要注意的是webdataset和dataset的表现似乎并不一样（webdataset似乎都是惰性处理的,**只有迭代的时候会真正读取**）
 >
->而dataset则不是，当加载数据集时指定streaming=True（流式数据集），map会变为完全惰性执行，与 WebDataset 的map行为一致：
+>而dataset则不是，当加载数据集时指定streaming=True（流式数据集）,或是Iterable dataset（只定义__iter__方法），map会变为完全惰性执行，与 WebDataset 的map行为一致：
 ```python
 from webdataset.compat import WebDataset
 def process_function(sample):
@@ -71,7 +71,7 @@ def main():
 大家可以试一下这个程序，它会先输出YES，再输出processing sample。意味着map只有在迭代的时候才会执行。
 
 根据和豆包反复对话得来的结论，我们似乎应该写一个process函数，在process函数中完成模型的预处理，然后对整个dataset调用map函数（把每个sample都提前处理一遍，而不是训练时一遍遍处理），然后保存到一块可持久的存储空间（例如硬盘）。训练的时候直接加载（dataset类也支持打包整个数据集到硬盘/读取）
-- 对于流式数据集和webdataset而言，只是构建了一个数据集的映射，并没有真正读取、处理数据
+- 对于Iterable dataset数据集和webdataset而言，只是构建了一个数据集的映射，并没有真正读取、处理数据
 
 但是这样很容易产生另一个问题：sample是如何聚合到batch的？
 
