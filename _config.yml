@@ -189,6 +189,8 @@ exclude:
   - README
   - tmp
   - vendor
+  - docs
+  - .superpowers
 keep_files:
   - .git
   - .svn
