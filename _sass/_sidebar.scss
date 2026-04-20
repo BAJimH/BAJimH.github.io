@@ -269,7 +269,7 @@
   @include breakpoint($large) {
     display: block;
     position: sticky;
-    top: $masthead-height + 1em;
+    top: calc(#{$masthead-height} + 1em);
     max-height: calc(100vh - #{$masthead-height} - 2em);
     overflow-y: auto;
   }
