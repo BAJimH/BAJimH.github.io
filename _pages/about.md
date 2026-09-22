@@ -8,9 +8,9 @@ redirect_from:
 ---
 
 <div class="intro-block" markdown="0">
-<p class="intro-lead">I am a master's candidate at the <strong>Camera Intelligence Lab</strong>, Peking University, supervised by Prof. Boxin Shi. My research interests include computer vision, machine learning, and computational photography, with a focus on spike-camera imaging and high-speed reconstruction.</p>
+<p class="intro-lead">I am a master's candidate at the <strong>Camera Intelligence Lab</strong>, Peking University, supervised by Prof. Boxin Shi (施柏鑫). My research interests include computer vision and visual generative models.</p>
 
-<p class="intro-lead intro-lead-zh">我是北京大学<strong>相机智能实验室</strong>硕士研究生，师从 Boxin Shi 教授。研究兴趣包括计算机视觉、机器学习与计算摄影，目前关注脉冲相机成像与高速重建。</p>
+<p class="intro-lead intro-lead-zh">我是北京大学<strong>相机智能实验室</strong>硕士研究生，师从施柏鑫教授。研究兴趣包括计算机视觉、视觉生成模型。</p>
 </div>
 
 <style>
