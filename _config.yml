@@ -8,7 +8,7 @@
 
 # Basic Site Settings
 locale                   : "zh-CN"
-title                    : "Zhaojun Huang's Personal Site"
+title                    : "Zhaojun Huang"
 title_separator          : "-"
 name                     : &name "Zhaojun Huang（黄兆鋆）"
 description              : &description "Zhaojun Huang (黄兆鋆) — Master's candidate at Camera Intelligence Lab, Peking University. Computer vision, machine learning, and computational photography."
@@ -23,7 +23,7 @@ author:
   # Biographic information
   avatar           : "hzj.png"
   name             : "Zhaojun Huang（黄兆鋆）"
-  bio              : "<span class='bio-en'>Master's candidate · Camera Intelligence Lab, PKU.<br>CV, ML &amp; computational photography.</span><span class='bio-zh'>北京大学相机智能实验室硕士研究生<br>计算机视觉 / 机器学习 / 计算摄影</span>"
+  bio              : ""
   location         : #"Beijing, China"
   employer         : "Peking University"
   uri              : # URL
