@@ -1,17 +1,32 @@
+{% comment %}
+  阅读时长：中英混排估算。
+  number_of_words 按空格分词，中文几乎不空格会严重低估；
+  因此用「字符数/350」与「词数/200」双估计，取较大值。
+{% endcomment %}
 {% if post.read_time %}
-  {% assign words = post.content | strip_html | number_of_words %}
+  {% assign text = post.content | strip_html %}
 {% elsif page.read_time %}
-  {% assign words = page.content | strip_html | number_of_words %}
+  {% assign text = page.content | strip_html %}
+{% else %}
+  {% assign text = "" %}
+{% endif %}
+
+{% assign words = text | number_of_words %}
+{% assign chars = text | size %}
+{% assign cjk_est = chars | divided_by: 350 %}
+{% assign word_est = words | divided_by: 200 %}
+{% if cjk_est > word_est %}
+  {% assign minutes = cjk_est %}
+{% else %}
+  {% assign minutes = word_est %}
 {% endif %}
 
 {% if site.words_per_minute %}
-  {% if words < 180 %}
-	  {{ site.data.ui-text[site.locale].less_than | default: "less than" }} 1 {{ site.data.ui-text[site.locale].minute_read | default: "minute read" }}
-	{% elsif words < 360 %}
-	  1 {{ site.data.ui-text[site.locale].minute_read | default: "minute read" }}
-	{% else %}
-	  {{ words | divided_by:site.words_per_minute }} {{ site.data.ui-text[site.locale].minute_read | default: "minute read" }}
-	{% endif %}
+  {% if minutes < 1 %}
+    {{ site.data.ui-text[site.locale].less_than | default: "less than" }} 1 {{ site.data.ui-text[site.locale].minute_read | default: "minute read" }}
+  {% else %}
+    {{ minutes }} {{ site.data.ui-text[site.locale].minute_read | default: "minute read" }}
+  {% endif %}
 {% else %}
-  {{ site.data.ui-text[site.locale].undefined_wpm | "Undefined parameter words_per_minute at _config.yml" }}
+  {{ site.data.ui-text[site.locale].undefined_wpm | default: "Undefined parameter words_per_minute at _config.yml" }}
 {% endif %}

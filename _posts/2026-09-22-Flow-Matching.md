@@ -8,7 +8,7 @@ tags:
 date: 2026-09-22
 ---
 
-# Flow matching杂谈
+### Flow matching杂谈
 
 >本文不含严谨数学推导
 
@@ -85,7 +85,7 @@ attribute to the bias of minibatch couplings and their model-agnostic assignment
 
 除此之外，还有x-prediction和v-prediction, x-loss和v-loss的区别。x-pred就是直接去预测最终的$x_1$，然后算出$v_t$。x-loss是类似的。它们可以自由组合，也可以用x-pred+v—loss这样。具体怎么样训更好，暂时就不分析了，有空可以琢磨琢磨。
 
-# 简单一点代码
+### 简单一点代码
 
 尽管现在都是code agent写了，最好还是懂点基础算法的代码，免得面试被问写不出来，让别人感觉你很菜，看了这么多理论白看。
 
