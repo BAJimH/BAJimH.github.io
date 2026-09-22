@@ -12,10 +12,10 @@ $doc-font-size              : 16;
 $paragraph-indent           : false; // true, false (default)
 $indent-var                 : 1.3em;
 
-/* system typefaces */
-$serif                      : Georgia, Times, serif;
-$sans-serif                 : -apple-system, ".SFNSText-Regular", "San Francisco", "Roboto", "Segoe UI", "Helvetica Neue", "Lucida Grande", Arial, sans-serif;
-$monospace                  : Monaco, Consolas, "Lucida Console", monospace;
+/* system typefaces — CJK 友好：在无衬线栈中加入中文黑体，保证中英混排清晰 */
+$serif                      : Georgia, "Songti SC", "Noto Serif SC", Times, serif;
+$sans-serif                 : -apple-system, "Segoe UI", "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", "Noto Sans SC", "Roboto", "Helvetica Neue", Arial, sans-serif;
+$monospace                  : "JetBrains Mono", Consolas, "SF Mono", Monaco, "Lucida Console", monospace;
 
 /* sans serif typefaces */
 $sans-serif-narrow          : $sans-serif;
@@ -61,18 +61,19 @@ $darker-gray                : mix(#000, $gray, 60%);
 $light-gray                 : mix(#fff, $gray, 50%);
 $lighter-gray               : mix(#fff, $gray, 90%);
 
+/* 纸感底色 + 石墨墨色，比纯灰更有编辑设计感 */
 $body-color                 : #fff;
-$background-color           : #fff;
-$code-background-color      : #fafafa;
+$background-color           : #fafbfc;
+$code-background-color      : #f4f6f8;
 $code-background-color-dark : $light-gray;
-$text-color                 : $dark-gray;
-$border-color               : $lighter-gray;
+$text-color                 : #2f3a45;
+$border-color               : #e3e8ee;
 
-$primary-color              : #7a8288;
-$success-color              : #62c462;
-$warning-color              : #f89406;
-$danger-color               : #ee5f5b;
-$info-color                 : #52adc8;
+$primary-color              : #3d4a56;
+$success-color              : #3d9a6a;
+$warning-color              : #c47b1a;
+$danger-color               : #c45c57;
+$info-color                 : #2f8fad;
 
 /* brands */
 $behance-color              : #1769FF;

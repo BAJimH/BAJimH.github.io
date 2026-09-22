@@ -153,6 +153,29 @@
   }
 }
 
+/* 双语简介：英文在上、中文在下，弱化分隔 */
+.author__bio--bilingual {
+  font-size: 0.85em;
+  line-height: 1.55;
+  color: $gray;
+
+  .bio-en,
+  .bio-zh {
+    display: block;
+  }
+
+  .bio-en {
+    color: $dark-gray;
+  }
+
+  .bio-zh {
+    margin-top: 0.45em;
+    padding-top: 0.45em;
+    border-top: 1px dashed $border-color;
+    color: $gray;
+  }
+}
+
 .author__urls-wrapper {
   position: relative;
   display: table-cell;

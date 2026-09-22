@@ -5,7 +5,7 @@ permalink: /publications/
 ---
 
 {% if site.author.googlescholar %}
-  <div class="wordwrap">You can also find my articles on <a href="{{site.author.googlescholar}}">my Google Scholar profile</a>.</div>
+  <div class="wordwrap pub-intro">Conference papers and selected works. Full list on <a href="{{site.author.googlescholar}}">Google Scholar</a>.</div>
 {% endif %}
 
 {% include base_path %}
@@ -19,7 +19,7 @@ permalink: /publications/
         {% continue %}
       {% endif %}
       {% unless title_shown %}
-        <h2>{{ category[1].title }}</h2><hr />
+        <h2 class="pub-section-title">{{ category[1].title }}</h2><hr />
         {% assign title_shown = true %}
       {% endunless %}
       {% include archive-single.html %}
@@ -30,6 +30,28 @@ permalink: /publications/
     {% include archive-single.html %}
   {% endfor %}
 {% endif %}
+
+<style>
+  .pub-intro {
+    margin-bottom: 1.5em;
+    color: #5a6772;
+    line-height: 1.6;
+  }
+  .pub-section-title {
+    margin-bottom: 0.35em;
+    font-size: 1.05em;
+    font-weight: 650;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    color: #3d4a56;
+  }
+  .pub-section-title + hr {
+    margin-top: 0.4em;
+    border: 0;
+    border-top: 2px solid #1f2933;
+  }
+</style>
+
 
 
 

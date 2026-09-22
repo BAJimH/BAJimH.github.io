@@ -11,7 +11,7 @@ locale                   : "zh-CN"
 title                    : "Zhaojun Huang's Personal Site"
 title_separator          : "-"
 name                     : &name "Zhaojun Huang（黄兆鋆）"
-description              : &description "personal description"
+description              : &description "Zhaojun Huang (黄兆鋆) — Master's candidate at Camera Intelligence Lab, Peking University. Computer vision, machine learning, and computational photography."
 url                      : https://bajimh.github.io # the base hostname & protocol for your site e.g. "https://mmistakes.github.io"
 baseurl                  : "" # the subpath of your site, e.g. "/blog"
 repository               : "BAJimH/BAJimH.github.io"
@@ -23,7 +23,7 @@ author:
   # Biographic information
   avatar           : "hzj.png"
   name             : "Zhaojun Huang（黄兆鋆）"
-  bio              : ""#School of Computer Science, Peking University
+  bio              : "<span class='bio-en'>Master's candidate · Camera Intelligence Lab, PKU.<br>CV, ML &amp; computational photography.</span><span class='bio-zh'>北京大学相机智能实验室硕士研究生<br>计算机视觉 / 机器学习 / 计算摄影</span>"
   location         : #"Beijing, China"
   employer         : "Peking University"
   uri              : # URL

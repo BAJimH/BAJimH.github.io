@@ -47,9 +47,111 @@
 }
 
 .archive__item-title {
-  margin-bottom: 0.25em;
-  font-family: $sans-serif-narrow;
+  margin-top: 0;
+  margin-bottom: 0.35em;
+  font-size: 1.15em;
+  font-weight: 650;
+  line-height: 1.35;
+  letter-spacing: -0.015em;
 
+  a {
+    text-decoration: none;
+    color: #1f2933;
+    background-image: linear-gradient(currentColor, currentColor);
+    background-position: 0 100%;
+    background-repeat: no-repeat;
+    background-size: 0 1px;
+    transition: background-size 0.25s ease, color 0.2s ease;
+
+    &:hover {
+      color: $info-color;
+      background-size: 100% 1px;
+    }
+  }
+}
+
+.archive__item {
+  margin-bottom: 1.75em;
+  padding-bottom: 1.35em;
+  border-bottom: 1px solid $border-color;
+
+  &:last-child {
+    border-bottom: 0;
+    padding-bottom: 0;
+  }
+}
+
+.archive__item-meta {
+  margin: 0 0 0.65em;
+  font-size: 0.9em;
+  color: $gray;
+  line-height: 1.5;
+
+  i {
+    font-style: normal;
+    font-weight: 550;
+    color: $dark-gray;
+  }
+}
+
+.archive__item-venue {
+  display: inline;
+}
+
+.archive__item-year {
+  display: inline-block;
+  margin-left: 0.55em;
+  padding: 0.08em 0.55em;
+  border: 1px solid $border-color;
+  border-radius: 999px;
+  font-size: 0.85em;
+  color: $primary-color;
+  background: #fff;
+  vertical-align: middle;
+}
+
+.archive__item-excerpt {
+  margin: 0 0 0.75em;
+  color: $dark-gray;
+  line-height: 1.6;
+}
+
+.archive__item-citation {
+  margin: 0.75em 0 0;
+  padding: 0.75em 0.95em;
+  font-size: 0.82em;
+  line-height: 1.55;
+  color: $gray;
+  background: #f7f9fb;
+  border-left: 3px solid $info-color;
+  border-radius: 0 6px 6px 0;
+}
+
+.citation-label {
+  display: block;
+  margin-bottom: 0.35em;
+  font-size: 0.85em;
+  font-weight: 650;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: $info-color;
+}
+
+.archive__item-links {
+  display: inline-block;
+  margin-top: 0.55em;
+  font-weight: 600;
+  color: $info-color;
+  text-decoration: none;
+  border-bottom: 1px solid transparent;
+  transition: border-color 0.2s ease;
+
+  &:hover {
+    border-bottom-color: $info-color;
+  }
+}
+
+.archive__item-title {
   a + a {
     opacity: 0.5;
   }

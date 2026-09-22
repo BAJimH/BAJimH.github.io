@@ -67,9 +67,10 @@
     font-size: 1em;
   }
 
-  /* paragraph indents */
+  /* 段落节奏：稍紧一点的行距 + 更稳的段间距 */
   p {
-    margin: 0 0 $indent-var;
+    margin: 0 0 1.15em;
+    line-height: 1.7;
 
     /* sibling indentation*/
     @if $paragraph-indent == true {
@@ -82,6 +83,9 @@
 
   a {
     text-decoration: underline;
+    text-decoration-thickness: 1px;
+    text-underline-offset: 2px;
+    transition: color 0.15s ease;
 
     &:hover {
       text-decoration: underline;
